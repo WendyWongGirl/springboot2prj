@@ -23,5 +23,14 @@ public interface IBookService extends IService<Book> {
      * @param pageSize 每页显示页数
      * @return IPage<Book>
      */
+    IPage<Book> queryByPage(int currentPage, int pageSize);
+
+    /**
+     * 带查询的分页
+     * @param currentPage
+     * @param pageSize
+     * @param queryBook
+     * @return
+     */
     IPage<Book> queryByPage(int currentPage, int pageSize, Book queryBook);
 }

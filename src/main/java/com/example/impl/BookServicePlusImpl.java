@@ -32,6 +32,13 @@ public class BookServicePlusImpl extends ServiceImpl<BookDao, Book> implements I
     }
 
     @Override
+    public IPage<Book> queryByPage(int currentPage, int pageSize) {
+        IPage<Book> page = new Page<>(currentPage, pageSize);
+        bookDao.selectPage(page, null);
+        return page;
+    }
+
+    @Override
     public IPage<Book> queryByPage(int currentPage, int pageSize, Book queryBook) {
         IPage<Book> page = new Page<>(currentPage, pageSize);
         LambdaQueryWrapper<Book> lambdaQueryWrapper = new LambdaQueryWrapper<>();
