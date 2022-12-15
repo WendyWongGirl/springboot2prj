@@ -3,6 +3,8 @@ package com.example.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.example.controller.utils.R;
 import com.example.domain.Book;
+import com.example.response.Result;
+import com.example.response.ResultCode;
 import com.example.service.IBookService;
 import com.google.gson.Gson;
 import io.swagger.annotations.Api;
@@ -34,6 +36,16 @@ public class BookController {
         }
         boolean flag = bookService.save(book);
         return new R(flag, book, flag ? "添加成功" : "添加数据失败，请重试！");
+//        return Result.message(ResultCode.SUCCESS.getMessage());
+
+
+//        return Result.ok()
+//                * 		//状态码
+// * 		.code(ResultCode.SUCCESS.getCode())
+//                * 		//状态信息
+// * 		.message(ResultCode.SUCCESS.getMessage())
+//                * 		//返回给前端的数据（如果不需要返回数据就不用.data）
+// *                 .data("data",data);
     }
 
     @PutMapping

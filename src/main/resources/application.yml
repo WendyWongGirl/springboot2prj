@@ -1,12 +1,13 @@
 server:
-  port: 80
+  port: 8081
 
 spring:
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      #url: jdbc:mysql://192.168.10.41:3306/db_ctdigitech?serverTimezone=UTC
+#      url: jdbc:mysql://192.168.10.41:3306/db_ctdigitech?serverTimezone=UTC
       url: jdbc:mysql://172.16.30.88:3306/db_ctdigitech?serverTimezone=UTC
+#      url: jdbc:mysql://192.168.10.43:3306/springboot2prj?serverTimezone=GMT%2B8
       username: root
       password: root@123!
 
@@ -17,3 +18,9 @@ mybatis-plus:
       id-type: auto
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#print log related
+logging:
+  level:
+    io.swagger.models.parameters.AbstractSerializableParameter: error
+

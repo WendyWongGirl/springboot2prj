@@ -2,9 +2,207 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试Vue中vIf与vShow的用法</title>
+  <style>
+    .box{
+      width: 100px;
+      height: 100px;
+      float: left;
+      line-height: 100px;
+      font-size: 20px;
+      text-align: center;
+    }
+    .box1{
+      background-color: aqua;
+    }
+    .box2{
+      background-color: beige;
+    }
+    .box3{
+      background-color: blue;
+    }
+    .box4{
+      background-color: brown;
+    }
+  </style>
 </head>
 <body>
-$END$
+<div id="app">
+  <div class="box box1" v-if="show1" >box1</div>
+  <div class="box box2" v-if="show2" >box2</div>
+  <div class="box box3" v-show="show3" >box3</div>
+  <div class="box box4" v-show="show4" >box4</div>
+  <div>
+    <button @click="upBox1">btn  1</button>
+    <button @click="upBox2">btn  2</button>
+    <button @click="upBox3">btn  3</button>
+    <button @click="upBox4">btn  4</button>
+  </div>
+</div>
 </body>
+<!-- 引入组件库 -->
+
+<script src="../js/vue.js"></script>
+
+<script src="../plugins/elementui/index.js"></script>
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+
+<script src="../js/axios-0.18.0.js"></script>
+
+<script>
+  class Vue {
+    constructor({ el, data, methods }) {
+      this.el = document.querySelector(el)
+      this.data = data
+      this.methods = methods
+      this.dataPool = new Map() // 用来存放Vif || Vshow 事件
+      this.eventPool = new Map() // 用来存放 @click 事件
+      this.init()
+    }
+    init () { // 用来存放初始化函数
+
+      this.initDom(this.el) // 初始化 dom
+      this.initData(this.data)    // 为数据添加数据劫持
+      this.initView(this.dataPool) // 添加响应视图
+      this.initClick(this.eventPool) // 添加点击响应
+    }
+
+    initDom (el) { // 遍历所有 dom 结点 提取 Vif Vshow @click 事件
+      const _this = this
+      const _childNode = el.childNodes
+
+      if(!_childNode.length){
+        return;
+      }
+      _childNode.forEach(dom => {
+        if(dom.nodeType === 1){
+          const Vif = dom.getAttribute('v-if')
+          const Vshow = dom.getAttribute('v-show')
+          const Vclick = dom.getAttribute('@click')
+          if(Vif){
+            // 储存数据池
+            this.dataPool.set(dom,{
+              type:'Vif',
+              props:Vif,
+              value:this.data[Vif]
+            })
+          }
+          if(Vshow){
+            // 储存数据池
+            this.dataPool.set(dom,{
+              type: 'Vshow',
+              props:Vshow,
+              value:this.data[Vshow]
+            })
+          }
+          if(Vclick){
+            // 储存数据池
+            this.eventPool.set(dom,{
+              type:'@click',
+              props:Vclick,
+              value:this.methods[Vclick]
+            })
+          }
+        }
+        _this.initDom(dom) // 递归来遍历所有分支结点
+      })
+    }
+
+    initView (dataPool) { // 初始化视图
+      this.changeData(null,dataPool)
+    }
+
+    changeData(k,dataPool){
+      const _this = this
+      if(!k){ // 初始化
+        for(let [key,value] of dataPool){
+          if(value.type === 'Vshow') { // 进行隐藏
+            !value.value && (key.style.display = 'none')
+          }
+          if(value.type === 'Vif'){ // 替换结点
+            value.comment = document.createComment('v-if')
+            !value.value && ( key.parentNode.replaceChild(value.comment,key))
+          }
+        }
+        return;
+      }
+
+      // 改变状态
+      for(let [key,val] of dataPool){
+        switch(val.type){
+          case 'Vshow': {
+            if(val.props === k){ // 隐藏
+              key.style.display = _this.data[k] ? 'block' : 'none'
+            }
+          }
+            break;
+          case 'Vif': {
+            if(val.props === k){ // 删除结点
+              _this.data[k] ? val.comment.parentNode.replaceChild(key, val.comment)
+                      : key.parentNode.replaceChild(val.comment, key)
+            }
+          }
+            break;
+          default:break;
+        }
+      }
+    }
+
+    initData(options){ // 添加数据劫持
+      const _this = this
+      Object.keys(options).forEach(key=>{
+        let _initData = options[key]
+        Object.defineProperty(options,key,{
+          get(){
+            return _initData
+          },
+          set(newVal){
+            _initData = newVal
+            _this.changeData(key,_this.dataPool)  // 更新dom结点
+          }
+        })
+      })
+    }
+
+    initClick(eventPool) {  // 添加数据绑定
+      const _this = this
+      for(let [key,val] of eventPool){
+        key.addEventListener('click',()=>{
+          val.value.apply(_this.data)
+        })
+      }
+    }
+
+  }
+</script>
+
+
+<script>
+  const vm = new Vue({
+    el:'#app',
+    data:{
+      show1:true,
+      show2:true,
+      show3:true,
+      show4:true
+    },
+    methods:{
+      upBox1(){
+        this.show1 = !this.show1
+      },
+      upBox2(){
+        this.show2 = !this.show2
+      },
+      upBox3(){
+        this.show3 = !this.show3
+      },
+      upBox4(){
+        this.show4 = !this.show4
+      }
+    }
+  })
+</script>
 </html>
